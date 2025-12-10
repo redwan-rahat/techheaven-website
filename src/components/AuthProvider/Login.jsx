@@ -2,16 +2,16 @@ import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { AuthContex } from "./AuthProvider";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+
 import Toast from "../Toast";
-import axios from "axios";
+
 
 const Login = () => {
   const {
     screenmode,
     handleSignIn,
-    handleGoogleSignIn,
     handleGetEmail,
+    fetchUserByEmail
 
   } = useContext(AuthContex);
   const [showToast, setShowToast] = useState(false);
@@ -22,40 +22,6 @@ const Login = () => {
   const [errormessage, seterrormess] = useState("");
   const nav = useNavigate();
 
-  const handleGDB = async (GUserInfo) => {
-          
-   await axios.get(
-        `https://tech-heaven-server-seven.vercel.app/users/${GUserInfo.email}`
-      )
-          .then(data=>{
-                
-         if(data.data == null || data.data == undefined || data.data == '') {
-   
-      axios.post("https://tech-heaven-server-seven.vercel.app/users", GUserInfo)
-        .then((data) => {})
-        .catch((error) => {});
-      
-    }
-  
-          })
-
-  };
-
-  // const handleDB = (UserData) => {
-  //   fetch(`https://tech-heaven-server-seven.vercel.app/users/${UserData.email}`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       if (!data) {
-  //         fetch("https://tech-heaven-server-seven.vercel.app/users", {
-  //           method: "POST",
-  //           headers: {
-  //             "content-type": "application/json",
-  //           },
-  //           body: JSON.stringify(UserData),
-  //         });
-  //       }
-  //     });
-  // };
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
@@ -73,6 +39,7 @@ const Login = () => {
     handleSignIn(email, password)
       .then((result) => {
         handleGetEmail(email);
+        fetchUserByEmail(email);
         setToastMessage("Login successful");
         setToastType("success");
         setShowToast(true);
@@ -91,41 +58,6 @@ const Login = () => {
       });
   };
 
-  const handleGSignIn = (e) => {
-    e.preventDefault();
-
-    handleGoogleSignIn()
-      .then((result) => {
-        const user = result.user;
-        const username = user.displayName;
-        const email = user.email;
-        const gurl = user.photoURL;
-        const gSignin = true;
-        const gverify = user.emailVerified;
-        handleGetEmail(email);
-        const UserInfog = {
-          username,
-          email,
-          gurl,
-          gSignin,
-          gverify,
-        };
-
-        handleGDB(UserInfog);
-        setToastMessage("Login successful");
-        setToastType("success");
-        setShowToast(true);
-
-        setTimeout(() => {
-          setShowToast(false);
-          setTimeout(() => {
-            nav("/");
-            window.location.reload();
-          }, 1000);
-        }, 1200);
-      })
-      .catch((error) => {});
-  };
 
   return (
     <div className="h-auto mb-16 md:mb-20 ">
@@ -227,15 +159,6 @@ const Login = () => {
             screenmode ? "bg-dmgreen" : "bg-lmblue "
           } border-dashed `}
         />
-
-        <div
-          onClick={handleGSignIn}
-          className={`hover:cursor-pointer  items-center flex w-4/5 md:w-2/5 m-auto border-2 py-2 rounded-tr-lg rounded-bl-lg space-x-4  md:mb-20 mb-12 justify-center hover:shadow-lg duration-200 hover:scale-105 ${
-            screenmode
-              ? "bg-slate-700 border-white hover:text-white hover:bg-dmgreen hover:bg-opacity-40 hover:shadow-dmgreen hover:shadow-md"
-              : "bg-[#eff4fd] border-slate-300 hover:bg-lmblue hover:text-white hover:bg-opacity-60 hover:shadow-lmblue hover:shadow-md"
-          }`}
-        >
           {showToast && (
             <Toast
               message={toastMessage}
@@ -244,17 +167,6 @@ const Login = () => {
             />
           )}
 
-          <img
-            src="https://i.postimg.cc/MZbxcsJG/google-png-small.png"
-            className="w-6"
-            alt=""
-          />
-          <div>
-            <h1 className="">
-              Sign In With <span className="font-semibold">Google</span>{" "}
-            </h1>
-          </div>
-        </div>
       </div>
     </div>
   );

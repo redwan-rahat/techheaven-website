@@ -1,18 +1,49 @@
-import { useLoaderData, useParams } from "react-router-dom";
+import {useParams } from "react-router-dom";
 import ViewProducts from "./ViewProducts";
 import NoProduct from "./NoProduct";
 import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { AuthContex } from "../AuthProvider/AuthProvider";
-import { reload } from "firebase/auth";
+
 
 const ShowProducts = () => {
     const [currentIndex,setCurrentIndex] = useState(0)
     const [images,setimages] = useState([])
     const {screenmode} = useContext(AuthContex)
-    const brandData = useLoaderData()
+    const [brandData,setBrandData] = useState([])
     const brand = useParams()
 
-    
+  console.log('inside showproduct')
+    useEffect(() => {
+      if (!brand) return; 
+  
+      const controller = new AbortController();
+      const signal = controller.signal;
+  
+      const fetchProducts = async () => {
+  
+        try {
+          const url = `http://localhost/api/getProducts.php?brand=${brand.brand}`
+  
+          const res = await fetch(url, { signal });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  
+          const data = await res.json();
+
+          setBrandData(Array.isArray(data) ? data : []);
+        } catch (err) {
+          if (err.name !== "AbortError") {
+            console.error("Fetch error:", err);
+            console.log(err.message )
+            setBrandData([]);
+          }
+        }
+      };
+  
+      fetchProducts();
+  
+
+      return () => controller.abort();
+    }, [brand]);
 
     useEffect(()=>{
 
@@ -20,7 +51,7 @@ const ShowProducts = () => {
       brandData.forEach(data =>
         {
            if(data?.url && arr.length<3) arr.push(data?.url)
-        
+            console.log(data)
         }
         )
       setimages(arr)
@@ -58,6 +89,9 @@ const ShowProducts = () => {
       const newIndex = isLastSlide ? 0 : currentIndex + 1;
       setCurrentIndex(newIndex);
     };
+
+
+    console.log(brandData)
     return (
         <div className="">
            

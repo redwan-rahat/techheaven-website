@@ -13,7 +13,27 @@ const AuthProvider = ({children}) => {
     const [totalCart,settotalCart] = useState(0)
     const [userInfo,setUserInfo] = useState('')
     const[useremail,setemail] = useState()
-   
+    const [userData, setUserData] = useState(null);
+
+    const fetchUserByEmail = async (email) => {
+      try {
+        const res = await fetch(
+          `http://localhost/api/getUserByEmail.php?email=${email}`
+        );
+    
+        const data = await res.json();
+    
+        // Save user data to localStorage
+        localStorage.setItem("userdata", JSON.stringify(data));
+    
+        console.log("User stored in localStorage:", data);
+        return data; // optional if you want to use it after calling
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        return null;
+      }
+    };
+    
     
     useEffect(()=>{
       localStorage.getItem('email') ? setemail(localStorage.getItem('email')) : ''
@@ -21,8 +41,9 @@ const AuthProvider = ({children}) => {
     
 
 
-    const handleGetEmail = (email)=>{
+    const handleGetEmail = (email,username)=>{
           localStorage.setItem('email',JSON.stringify(email))
+          localStorage.setItem('username',JSON.stringify(username))
           setemail(email)
     }
 
@@ -67,7 +88,8 @@ const AuthProvider = ({children}) => {
       const handleSignOut =()=>{
         setloader(true)
         settotalCart(0)
-        localStorage.removeItem('email')
+        localStorage.clear();
+            window.location.reload();
         return signOut(auth)
       }
 
@@ -88,7 +110,7 @@ const AuthProvider = ({children}) => {
 
 
 
-    const UserData = { userInfo,setUserInfo,screenmode,changeScreen,handleSignUp,user,loader,handleSignIn,handleSignOut,handleGoogleSignIn,handleGetEmail,useremail,settotalCart,totalCart}
+    const UserData = {fetchUserByEmail, userInfo,setUserInfo,screenmode,changeScreen,handleSignUp,user,loader,handleSignIn,handleSignOut,handleGoogleSignIn,handleGetEmail,useremail,settotalCart,totalCart}
     return (
         <div>
             <AuthContex.Provider value = {UserData}>{children}</AuthContex.Provider>

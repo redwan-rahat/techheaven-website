@@ -7,7 +7,7 @@ import axios from "axios";
 
 
 const Register = () => {
-  const { screenmode, handleSignUp, handleGoogleSignIn, handleGetEmail } =
+  const { screenmode, handleSignUp, handleGoogleSignIn, handleGetEmail,fetchUserByEmail } =
     useContext(AuthContex);
   const [showpass, setshowpass] = useState(false);
   const [showconpass, setshowconpass] = useState(false);
@@ -17,60 +17,23 @@ const Register = () => {
   const [toastType, setToastType] = useState("success");
   const nav = useNavigate();
 
-  const handleGDB = async (GUserInfo) => {
-          
-    await axios.get(
-         `https://tech-heaven-server-seven.vercel.app/users/${GUserInfo.email}`
-       )
-           .then(data=>{
-                 
-          if(data.data == null || data.data == undefined || data.data == '') {
 
-       axios.post("https://tech-heaven-server-seven.vercel.app/users", GUserInfo)
-         .then((data) => {})
-         .catch((error) => {});
-       
-     }     })
- 
-   };
-
-  const handleDB = async (UserData) => {
-    try {
-      await fetch("https://tech-heaven-server-seven.vercel.app/users", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(UserData),
+  const handleDB = async (UserInfo) => {
+    console.log(UserInfo)
+    fetch("http://localhost/api/addUser.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(UserInfo),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("User created:", data);
+        fetchUserByEmail(UserInfo?.email)
       })
-        .then((res) => res.json())
-        .then((data) => {});
-
-      setToastMessage("Sign Up Was Successful");
-      setToastType("success");
-      setShowToast(true);
-
-      setTimeout(() => {
-        setShowToast(false);
-        setTimeout(() => {
-          nav("/");
-          window.location.reload();
-        }, 1000);
-      }, 1200);
-    } catch {
-      setToastMessage("Login successful");
-      setToastType("error");
-      setShowToast(true);
-
-      setTimeout(() => {
-        setShowToast(false);
-        // setTimeout(() => {
-        //   nav("/");
-        // }, 1000);
-      }, 1200);
-    } finally {
-      //nothing
-    }
+      .catch((err) => console.log("Error:", err));
+      
   };
 
   const handleRegister = (e) => {
@@ -81,13 +44,10 @@ const Register = () => {
     const email = form.email.value;
     const password = form.password.value;
     const confirmpass = form.confirm.value;
-    const gSignin = false;
+
     const UserInfo = {
       email,
-      password,
-      confirmpass,
       username,
-      gSignin,
     };
 
     if (password !== confirmpass) seterrormess("password does not match");
@@ -106,42 +66,10 @@ const Register = () => {
 
       handleSignUp(email, password)
         .then((result) => {
-          handleGetEmail(email);
+          handleGetEmail(email,username);
           handleDB(UserInfo);
-        })
-
-        .catch((error) => {
-          if (error.message == "Firebase: Error (auth/email-already-in-use).")
-            seterrormess("Email Already in use");
-          else if (error.message == "Firebase: Error (auth/invalid-email).")
-            seterrormess(" the Email is invalid");
-        });
-    }
-  };
-
-  const handleGSignIn = (e) => {
-    e.preventDefault();
-
-    handleGoogleSignIn()
-      .then((result) => {
-        const user = result.user;
-        const username = user.displayName;
-        const email = user.email;
-        const gurl = user.photoURL;
-        const gSignin = true;
-        const gverify = user.emailVerified;
-        handleGetEmail(email);
-        const GUserInfo = {
-          username,
-          email,
-          gurl,
-          gSignin,
-          gverify,
-        };
-
-        handleGDB(GUserInfo);
-
-        setToastMessage("Login successful");
+          
+          setToastMessage("Login successful");
         setToastType("success");
         setShowToast(true);
 
@@ -152,11 +80,18 @@ const Register = () => {
             window.location.reload();
           }, 1000);
         }, 1200);
+
       })
-      .catch((error) => {
-        //error
-      });
+
+        .catch((error) => {
+          if (error.message == "Firebase: Error (auth/email-already-in-use).")
+            seterrormess("Email Already in use");
+          else if (error.message == "Firebase: Error (auth/invalid-email).")
+            seterrormess(" the Email is invalid");
+        });
+    }
   };
+
 
   return (
     <div>
@@ -315,25 +250,6 @@ const Register = () => {
             } border-dashed `}
           />
 
-          <div
-            onClick={handleGSignIn}
-            className={`hover:cursor-pointer  items-center flex w-4/5 md:w-2/5 m-auto border-2 py-2 rounded-tr-lg rounded-bl-lg space-x-4  md:mb-20 mb-12 justify-center hover:shadow-lg duration-200 hover:scale-105 ${
-              screenmode
-                ? "bg-slate-700 border-white hover:text-white hover:bg-dmgreen hover:bg-opacity-40 hover:shadow-dmgreen hover:shadow-md"
-                : "bg-[#eff4fd] border-slate-300 hover:bg-lmblue hover:text-white hover:bg-opacity-60 hover:shadow-lmblue hover:shadow-md"
-            }`}
-          >
-            <img
-              src="https://i.postimg.cc/MZbxcsJG/google-png-small.png"
-              className="w-6"
-              alt=""
-            />
-            <div>
-              <h1 className="">
-                Sign In With <span className="font-semibold">Google</span>{" "}
-              </h1>
-            </div>
-          </div>
         </div>
       </div>
     </div>

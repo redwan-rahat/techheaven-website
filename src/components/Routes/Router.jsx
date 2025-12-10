@@ -6,13 +6,11 @@ import ErrorPage from "../ErrorPage";
 import Login from "../AuthProvider/Login";
 import Register from "../AuthProvider/Register";
 import PrivateRoute from "../Private Routes/PrivateRoute";
-import AddProduct from "../Private Routes/AddProduct";
 import ShowProducts from "../Home/ShowProducts";
 import ViewDetails from "../Private Routes/ViewDetails";
-import UpdateInfo from "../Private Routes/UpdateInfo";
 import AddtoCart from "../Navbar/AddtoCart";
 import Contact from "../Contacts/Contact";
-import Practise from "../Practise";
+
 
 const router = createBrowserRouter([
   {
@@ -37,44 +35,12 @@ const router = createBrowserRouter([
         element: <Register></Register>,
       },
       {
-        path: "/addproduct",
-        element: (
-          <PrivateRoute>
-            <AddProduct></AddProduct>
-          </PrivateRoute>
-        ),
-      },
-      {
         path: "/showproducts/:brand",
-        loader: ({ params }) =>
-          fetch(
-            `https://tech-heaven-server-seven.vercel.app/showproducts/${params.brand}`
-          ),
         element: <ShowProducts></ShowProducts>,
       },
       {
-        path: "/details/:brand/:id",
-        loader: ({ params }) =>
-          fetch(
-            `https://tech-heaven-server-seven.vercel.app/details/${params.brand}/${params.id}`
-          ),
-        element: (
-          <PrivateRoute>
-            <ViewDetails></ViewDetails>
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "/update/:brand/:id",
-        loader: ({ params }) =>
-          fetch(
-            `https://tech-heaven-server-seven.vercel.app/update/${params.brand}/${params.id}`
-          ),
-        element: (
-          <PrivateRoute>
-            <UpdateInfo></UpdateInfo>
-          </PrivateRoute>
-        ),
+        path: "/details/:id",
+        element: <ViewDetails></ViewDetails>,
       },
       {
         path: "/contact",
@@ -88,10 +54,6 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      {
-        path:'/practise',
-        element:<Practise></Practise>
-      }
     ],
   },
 ]);

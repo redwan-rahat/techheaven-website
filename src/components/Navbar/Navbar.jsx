@@ -4,19 +4,59 @@ import { TiShoppingCart } from "react-icons/ti";
 import { FaToggleOff, FaToggleOn } from "react-icons/fa6";
 import { RiMenu4Fill } from "react-icons/ri";
 import { NavLink } from "react-router-dom";
-
+import { FaUserCircle } from "react-icons/fa";
 const Navbar = () => {
   const {
     screenmode,
     changeScreen,
     user,
     handleSignOut,
-    settotalCart,
-    totalCart,
-    setUserInfo,
-
-    userInfo,
   } = useContext(AuthContex);
+
+  const [username,setUsername] = useState()
+  const[totalCart,setTotalCart] = useState()
+  useEffect(() => {
+    const updateFromStorage = () => {
+      const raw = localStorage.getItem("userdata");
+      if (!raw) {
+        setUsername("");
+        setTotalCart(0);
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        setUsername(parsed.username || "");
+        const cart = Array.isArray(parsed.cart) ? parsed.cart : [];
+        const total = cart.reduce((acc, item) => {
+          const qty = Number(item.qty ?? 1);
+          return acc + (isNaN(qty) ? 1 : qty);
+        }, 0);
+        setTotalCart(total);
+      } catch {
+        setUsername("");
+        setTotalCart(0);
+      }
+    };
+  
+    updateFromStorage();
+  
+    const handleStorage = (e) => {
+      if (!e || e.key === "userdata") updateFromStorage();
+    };
+  
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("userdataChanged", updateFromStorage);
+  
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("userdataChanged", updateFromStorage);
+    };
+  }, []);
+  
+  
+
+
+
   const [useremail, setuseremail] = useState(
     JSON.parse(localStorage.getItem("email"))
   );
@@ -25,21 +65,9 @@ const Navbar = () => {
     setuseremail(useremail);
   }, []);
   const [scroll, setScroll] = useState(false);
-  const [charImg, setcharImg] = useState(null);
 
-  useEffect(() => {
-    fetch(`https://tech-heaven-server-seven.vercel.app/users/${useremail}`)
-      .then((res) => res.json())
-      .then((data) => {
-        data.cart ? settotalCart(data.cart.length) : settotalCart(0);
 
-        setcharImg(data.username.charAt(0));
-        setUserInfo({
-          username: data.username,
-          userpro: data.gurl ? data.gurl : null,
-        });
-      });
-  }, [useremail]);
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -190,30 +218,16 @@ const Navbar = () => {
       </li>
 
       {user ? (
-        <div className="flex space-x-2 items-center -ml-2 md:ml-4 lg:ml-0 mt-2 md:mt-0 scale-75 md:scale-100">
+        <div className="flex space-x-2 items-center">
           <div
             className={`flex ${screenmode
                 ? "border-dmgreen md:bg-dmgreen"
                 : "border-lmblue md:bg-lmblue "
-              } md:text-white border  md:font-bold font-page  items-center  space-x-2 h-12 w-48 rounded-full px-1 `}
+              } md:text-white border  md:font-bold font-page  items-center h-12 w-fit  flex  rounded-full px-1 `}
           >
-            {userInfo.userpro ? (
-              <img
-                src={userInfo.userpro.replace(/['"]+/g, "")}
-                className={`w-10 h-10 rounded-full`}
-                alt=""
-              />
-            ) : (
-              <div
-                className={`w-10 h-10 rounded-full items-center text-center text-3xl border-2 ${screenmode ? " bg-white text-black" : "bg-black text-white"
-                  } `}
-              >
-                {" "}
-                <h1 className="">{charImg}</h1>
-              </div>
-            )}
-            <h1 className="whitespace-nowrap text-sm md:text-[17px] overflow-hidden ">
-              {userInfo.username}
+            <FaUserCircle className="text-4xl"/>
+            <h1 className="whitespace-nowrap pr-4 pl-2 capitalize text-sm md:text-[17px] overflow-hidden ">
+              {username}
             </h1>
           </div>
         </div>
