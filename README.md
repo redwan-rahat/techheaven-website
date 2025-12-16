@@ -10,7 +10,7 @@ This system handles email/password authentication, making user management seamle
 
 2. Product Management
 Logged-in users can add new products to their profile, offering a personalized experience. 
-The integration with MongoDB ensures that all product data is stored securely and retrieved quickly when needed.
+The integration with SQL Database ensures that all product data is stored securely and retrieved quickly when needed.
 
 3. Cart Functionality
 Users can easily add products to their cart and remove items as they shop. 
